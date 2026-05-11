@@ -15,10 +15,7 @@ public class GameIO {
         this.scanner = new Scanner(in);
     }
 
-    public boolean askForGameLoading() {
-        System.out.println("Do you want to load a saved game from the database? ");
-        return readYesNo();
-    }
+
 
     public int readTableSize() {
         int size = -1;
@@ -125,37 +122,8 @@ public class GameIO {
             default: return null;
         }
     }
-    public String getGameSaveName() {
-        System.out.println("Possible saving of the actual played game");
-        System.out.println("You can save the actual game.");
-        System.out.println("Please type in a new name without spaces otherwise just push an enter");
-
-        String read = scanner.nextLine();
-        if (read == null || read.length() == 0) {
-            System.out.println("No saving happened");
-            return null;
-        }
-        return  Arrays.stream(read.split(" ")).findFirst().get();
-    }
-
-    public static int getGameIdFromUser(int minId, int maxId) {
-        Scanner scanner = new Scanner(System.in);
-        int id = -1;
-        while (!(minId <= id && id <= maxId)) {
-            System.out.println("Please select an existing ID (the max is: " + maxId + ") of a saved game which you will play: ");
-            try {
-                String readLine = scanner.nextLine();
-                id = Integer.parseInt(readLine);
-            } catch (NumberFormatException exception) {
-                logger.warning("wrong format for a number");
-            }
-        }
-        return id;
-    }
 
     private  GameIO gameIO;
-    public void DatabaseManager(GameIO gameIO) {
-        this.gameIO = gameIO;
-    }
+
 
 }

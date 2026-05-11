@@ -7,7 +7,6 @@ import thefoxandthehounds.businesslogic.Hound;
 import thefoxandthehounds.businesslogic.Move;
 import thefoxandthehounds.businesslogic.Table;
 
-import java.sql.*;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -27,110 +26,14 @@ public class PlayOnTerminal {
 
 
     public static void main(String[] args) {
-        isLoadedAGame =  questionForLoading();
-        if (!isLoadedAGame) {
-            readInSize();
-            editing();
-        }
+
+        readInSize();
+        editing();
         System.out.println("The table to play is: "+table);
         readInSide();
         playing();
-        saveThePlayedGame();
     }
 
-
-    public static boolean questionForLoading() {
-        scanner = new Scanner(in);
-        System.out.println("Do you want to load a saved game from the database? ");
-        String read = null;
-        char answer = ' ';
-        while (!(answer == 'y' || answer == 'n')) {
-            System.out.print("Give 'y' or 'n' as answer: \n ");
-            read = scanner.nextLine();
-            answer = read.toLowerCase().charAt(0);
-        }
-        if (answer == 'n' ) {return false;}
-        else {
-            try {
-                Class.forName ("org.h2.Driver");
-            } catch (ClassNotFoundException e) {
-                logger.severe("H2 database not found");
-            }
-            loadAGame();
-            return true;
-        }
-
-
-
-
-    }
-
-    /**
-     * the method gets info from the databasa to fill in the board
-     */
-    private static void loadAGame() {
-        String queryForAllSavedGames = "SELECT * FROM  SavedGameFoxAndHounds ORDER BY ID;";
-        String queryForOneSavedGameByID =  "SELECT SIZE,NAME,TABLEDESCRIPTION,IS_FOX_ON_MOVE,IS_HUMAN_WITH_FOX "+
-                "FROM  SavedGameFoxAndHounds WHERE ID = ?;";
-        int ID = -1;
-        int IDMAX = -1;
-        try (Connection connection = DriverManager.getConnection
-                ("jdbc:h2:tcp://localhost/~/test", "sa", "")) {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(queryForAllSavedGames);
-            System.out.println("Here come the names of the saved games:");
-            while (resultSet.next()) {
-                ID = resultSet.getInt("ID");
-                String name = resultSet.getString("NAME");
-                System.out.println(ID + " " + name);
-            }
-            resultSet.close();
-            statement.close();
-            IDMAX = ID;
-            scanner = new Scanner(in);
-            ID = -1;
-            while (!(1 <= ID && ID <= IDMAX)) {
-                System.out.println("Please select an existing ID (the max is: "+IDMAX+") of a saved game which you will play: ");
-                String readLine = scanner.nextLine();
-                try {
-                    ID = Integer.parseInt(readLine);
-                } catch (NumberFormatException exception) {
-                    logger.warning("wrong format for a number");
-                }
-            }
-        } catch (SQLException sqlex) {logger.severe("loading of names of saved games from db failed");}
-
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "")) {
-
-            PreparedStatement preparedStatement = connection.prepareStatement(queryForOneSavedGameByID);
-            preparedStatement.setInt(1,ID);
-            ResultSet resultSet2 = preparedStatement.executeQuery();
-            resultSet2.next();
-            size = resultSet2.getInt("SIZE");
-            humanPlaysWithFox = (resultSet2.getInt("IS_HUMAN_WITH_FOX")==1)?true:false;
-            foxIsOnMove = (resultSet2.getInt("IS_FOX_ON_MOVE")==1)?true:false;
-            String tableDescription =  resultSet2.getString("TABLEDESCRIPTION");
-            table = Table.getEmptyTable(size);
-            for (int row=0; size>row;row++) {
-                for (int col=0; size>col;col++) {
-                    if (tableDescription.charAt(row*size+col)=='h') {
-                        table.addHound(new Hound(row,col));
-                    }
-                    if (tableDescription.charAt(row*size+col)=='f') {
-                        table.addFox(new Fox(row,col));
-                    }
-
-                }
-            }
-            isLoadedAGame = true;
-
-
-        }
-        catch(SQLException ex) {logger.severe("There is a problem with the chosen ID: "+ex.getSQLState());}
-
-
-
-    }
 
 
     public static void readInSize() {
@@ -390,40 +293,6 @@ public class PlayOnTerminal {
         }
     }
 
-    private static void saveThePlayedGame() {
-        System.out.println("Possible saving of the actual played game");
-        try (Connection connection =
-                     DriverManager.getConnection
-                             ("jdbc:h2:tcp://localhost/~/test", "sa", "")) {
-            System.out.println("You can save the actual game.");
-            System.out.println("Please type in a new name without spaces otherwise just push an enter");
-            scanner = new Scanner(in);
-            String read = scanner.nextLine();
-            if (read==null || read.length()==0) {
-                System.out.println("No saving happened");
-                return;
-            }
-            String askedName = Arrays.stream(read.split(" ")).findFirst().get();
-            StringBuilder sb = new StringBuilder();
-            Character[][] matrix = table.getMatrix();
-            for (int row=0;size>row;row++) for (int col=0;size>col;col++) {
-                sb.append(matrix[row][col]);
-            }
-            String tableDescriptionAsString = sb.toString();
-            String queryToInsert = "INSERT INTO SavedGameFoxAndHounds"+
-                    "(SIZE,NAME,TABLEDESCRIPTION,IS_FOX_ON_MOVE,IS_HUMAN_WITH_FOX)" +
-                    "VALUES" +
-                    "("+4+
-                    ",'"+askedName+"','"+tableDescriptionAsString+"',"+(foxIsOnMove?1:0)+","+
-                    (humanPlaysWithFox?1:0)+");";
-            System.out.println("queryToInsert: "+queryToInsert);
-            PreparedStatement insertStatement = connection.prepareStatement(queryToInsert);
-            System.out.println("Ennyi sor változott"+insertStatement.executeUpdate());
-        } catch (SQLException sqlex) {logger.severe("loading of names of saved games from db failed");}
-
-
-    }
 
 
 }
-    

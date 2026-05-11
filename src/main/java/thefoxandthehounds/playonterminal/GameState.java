@@ -8,14 +8,14 @@ public class GameState {
     private Table table;
     private Boolean humanPlaysWithFox;
     private Boolean foxIsOnMove;
-    private boolean isLoadedGame;
+
 
     public GameState() {
         this.size = -1;
         this.table = null;
         this.humanPlaysWithFox = null;
         this.foxIsOnMove = null;
-        this.isLoadedGame = false;
+
     }
 
     public GameState(int size) {
@@ -24,7 +24,6 @@ public class GameState {
         this.table = Table.getEmptyTable(size);
         this.humanPlaysWithFox = null;
         this.foxIsOnMove = null;
-        this.isLoadedGame = false;
     }
 
     private void validateSize(int size) {
@@ -99,25 +98,7 @@ public class GameState {
         this.foxIsOnMove = foxIsOnMove;
     }
 
-    public boolean isLoadedGame() {
-        return isLoadedGame;
-    }
 
-    public void setLoadedGame(boolean loadedGame) {
-        isLoadedGame = loadedGame;
-    }
-
-    // Game state serialization for database
-    public String getTableDescription() {
-        StringBuilder sb = new StringBuilder();
-        Character[][] matrix = table.getMatrix();
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                sb.append(matrix[row][col]);
-            }
-        }
-        return sb.toString();
-    }
 
     // Utility methods
     public Hound getHound(int row, int col) {
