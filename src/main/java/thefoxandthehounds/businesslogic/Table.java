@@ -163,16 +163,18 @@ public class Table {
         int col = fig.getCol();
         fig.setRow(row + move.getDirection().getRowStep());
         fig.setCol(col + move.getDirection().getColStep());
-        if (isFoxOnMove != null) {
-            isFoxOnMove = !isFoxOnMove;
-        }
+
         matrix[row][col] = ' ';
         if (fig instanceof Fox) {
             matrix[fig.getRow()][fig.getCol()] = 'f'; // these are the new values
         } else { // The mover is a hound
             matrix[fig.getRow()][fig.getCol()] = 'h'; // these are the new values
         }
-        isFoxOnMove = !isFoxOnMove;
+
+        // ONLY toggle this ONCE at the end
+        if (isFoxOnMove != null) {
+            isFoxOnMove = !isFoxOnMove;
+        }
     }
 
     public void doARandomHoundMove() {
@@ -233,7 +235,30 @@ public class Table {
             }
         }
     }
+    public Table cloneTable() {
+        Table copy = new Table();
+        copy.setTableSize(this.tableSize);
+        copy.matrix = new Character[tableSize][tableSize];
 
+        // Copy the matrix
+        for (int i = 0; i < tableSize; i++) {
+            for (int j = 0; j < tableSize; j++) {
+                copy.matrix[i][j] = this.matrix[i][j];
+            }
+        }
+
+        // Copy the Fox
+        copy.fox = new Fox(this.fox.getRow(), this.fox.getCol());
+
+        // Copy the Hounds
+        copy.hounds = new ArrayList<>();
+        for (Hound h : this.hounds) {
+            copy.hounds.add(new Hound(h.getRow(), h.getCol()));
+        }
+
+        copy.isFoxOnMove = this.isFoxOnMove;
+        return copy;
+    }
 
 
 }
