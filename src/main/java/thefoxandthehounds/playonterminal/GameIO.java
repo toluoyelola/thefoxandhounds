@@ -6,7 +6,6 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 
 import static java.lang.System.in;
-import static thefoxandthehounds.playonterminal.PlayOnTerminal.logger;
 
 public class GameIO {
     private Scanner scanner;

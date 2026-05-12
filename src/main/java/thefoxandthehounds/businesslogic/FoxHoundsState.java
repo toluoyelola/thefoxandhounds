@@ -1,15 +1,16 @@
 package thefoxandthehounds.businesslogic;
 
 import thefoxandthehounds.minmax.GameState;
-
 import java.util.List;
 
 public class FoxHoundsState implements GameState<Move> {
 
     private Table table;
+    private boolean isFoxTurn; // We will explicitly track the turn here
 
-    public FoxHoundsState(Table table) {
+    public FoxHoundsState(Table table, boolean isFoxTurn) {
         this.table = table;
+        this.isFoxTurn = isFoxTurn;
     }
 
     @Override
@@ -19,14 +20,23 @@ public class FoxHoundsState implements GameState<Move> {
 
     @Override
     public int evaluate() {
-        // If the game is over, assign massive points.
         if (table.winFox()) return 1000;
         if (table.winHounds()) return -1000;
 
-        // HEURISTIC: Unlike Tic-Tac-Toe, we need to score mid-game boards.
-        // The Fox wants to reach row 0. So, the closer to 0, the higher the score.
-        int score = (table.getTableSize() - table.getFox().getRow()) * 10;
-        return score;
+        // HEURISTIC UPGRADE:
+        // 1. Fox wants to reach row 0 (Max player wants high score)
+        int score = (table.getTableSize() - table.getFox().getRow()) * 100;
+
+        // 2. Hounds (Min player) want to lower the score.
+        // We add the distance between the hounds and the fox to the score.
+        // The closer the hounds get, the lower the score becomes!
+        int distancePenalty = 0;
+        for (Hound h : table.hounds) {
+            distancePenalty += Math.abs(h.getRow() - table.getFox().getRow()) +
+                    Math.abs(h.getCol() - table.getFox().getCol());
+        }
+
+        return score + distancePenalty;
     }
 
     @Override
@@ -42,17 +52,13 @@ public class FoxHoundsState implements GameState<Move> {
 
     @Override
     public GameState<Move> makeMove(Move move) {
-        // 1. Create a clone so we don't mess up the real game
         Table nextTable = table.cloneTable();
-
-        // 2. We have to map the old move to the new cloned figures
         Figure mover = move.getMover();
         Figure clonedMover = null;
 
         if (mover instanceof Fox) {
             clonedMover = nextTable.getFox();
         } else {
-            // Find the matching hound in the cloned table
             for (Hound h : nextTable.hounds) {
                 if (h.getRow() == mover.getRow() && h.getCol() == mover.getCol()) {
                     clonedMover = h;
@@ -61,14 +67,13 @@ public class FoxHoundsState implements GameState<Move> {
             }
         }
 
-        // 3. Apply the move to the cloned table
         nextTable.doMove(new Move(clonedMover, move.getDirection()));
-        return new FoxHoundsState(nextTable);
+        // Pass the OPPOSITE turn to the next level of the simulation
+        return new FoxHoundsState(nextTable, !isFoxTurn);
     }
 
     @Override
     public boolean isMaxPlayerTurn() {
-        // Let's assume Fox is Max, Hounds are Min
-        return table.isFoxOnMOve();
+        return isFoxTurn;
     }
 }

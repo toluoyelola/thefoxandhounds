@@ -91,7 +91,7 @@ public class GamePlay {
     // 4. CENTRALIZED AI LOGIC
     private void aiMove(String actor) {
         System.out.println("AI " + actor + " is thinking...");
-        FoxHoundsState currentState = new FoxHoundsState(gameState.getTable());
+        FoxHoundsState currentState = new FoxHoundsState(gameState.getTable(), gameState.getFoxIsOnMove());
         Move bestAiMove = AIPlayer.findBestMove(currentState, AI_SEARCH_DEPTH);
 
         if (bestAiMove != null) {

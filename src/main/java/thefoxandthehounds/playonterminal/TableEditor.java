@@ -13,9 +13,9 @@ public class TableEditor {
     private Scanner scanner;
     private Table table;
 
-    public TableEditor(GameIO gameIO, GameState gameState) {  // Add gameState parameter
+    public TableEditor(GameIO gameIO, GameState gameState) {
         this.gameIO = gameIO;
-        this.gameState = gameState;  // Properly set the gameState
+        this.gameState = gameState;
     }
 
     public void editTable() {
@@ -35,6 +35,10 @@ public class TableEditor {
     private void editingFromEmptyTable() {
         scanner = new Scanner(in);
         table = Table.getEmptyTable(gameState.getSize());
+
+        // FIX: Sync the new table to the GameState immediately
+        gameState.setTable(table);
+
         System.out.println("Input row and column coordinates of the fox indexed starting with 0: ");
         String line = scanner.nextLine();
         Scanner lineScanner = new Scanner(line);
@@ -58,6 +62,10 @@ public class TableEditor {
         Character c;
         Hound activeHound = null;
         table = Table.getStarterTable(gameState.getSize());
+
+        // FIX: Sync the new table to the GameState immediately
+        gameState.setTable(table);
+
         System.out.println("The starting table: " + table);
         c = 'a';
 
