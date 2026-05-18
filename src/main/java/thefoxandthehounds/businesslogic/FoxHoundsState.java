@@ -20,23 +20,40 @@ public class FoxHoundsState implements GameState<Move> {
 
     @Override
     public int evaluate() {
-        if (table.winFox()) return 1000;
-        if (table.winHounds()) return -1000;
+        if (table.winFox()) return 10000;
+        if (table.winHounds()) return -10000;
 
-        // HEURISTIC UPGRADE:
-        // 1. Fox wants to reach row 0 (Max player wants high score)
-        int score = (table.getTableSize() - table.getFox().getRow()) * 100;
+        int score = 0;
+        Fox fox = table.getFox();
 
-        // 2. Hounds (Min player) want to lower the score.
-        // We add the distance between the hounds and the fox to the score.
-        // The closer the hounds get, the lower the score becomes!
-        int distancePenalty = 0;
+        // 1. FOX PROGRESS (Max player wants higher score)
+        // Heavily reward the fox for getting closer to row 0
+        score += (table.getTableSize() - fox.getRow()) * 100;
+
+        // 2. FOX MOBILITY (How many moves does the fox have right now?)
+        // A trapped fox is a dead fox. Hounds want to minimize this, Fox wants to maximize it.
+        table.determineFoxPossibleMoves();
+        score += table.foxPossibleMoves.size() * 15;
+
+        // 3. HOUND EVALUATION (Min player wants to lower the score)
         for (Hound h : table.hounds) {
-            distancePenalty += Math.abs(h.getRow() - table.getFox().getRow()) +
-                    Math.abs(h.getCol() - table.getFox().getCol());
+            // If a hound is BEHIND the fox (higher row number), it can never move backward to catch it.
+            // This hound is useless. We penalize the hounds (increase the score for the fox)
+            if (h.getRow() > fox.getRow()) {
+                score += 300;
+            } else {
+                // Hound is in front of the fox. Good for hounds!
+                // We use Manhattan distance, but weigh vertical distance slightly more
+                // because blocking the forward path is more important than horizontal distance.
+                int verticalDist = Math.abs(h.getRow() - fox.getRow());
+                int horizontalDist = Math.abs(h.getCol() - fox.getCol());
+
+                // Hounds want this distance to be as small as possible
+                score -= (verticalDist * 10) + (horizontalDist * 5);
+            }
         }
 
-        return score + distancePenalty;
+        return score;
     }
 
     @Override

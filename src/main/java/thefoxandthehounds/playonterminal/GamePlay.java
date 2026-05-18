@@ -133,9 +133,9 @@ public class GamePlay {
 
     private void announceWinner() {
         if (gameState.getTable().winFox()) {
-            System.out.println(gameState.getHumanPlaysWithFox() ? "You won!" : "You loose!");
+            System.out.println(gameState.getHumanPlaysWithFox() ? "You won!" : "You lose!");
         } else if (gameState.getTable().winHounds()) {
-            System.out.println(!gameState.getHumanPlaysWithFox() ? "You won!" : "You loose!");
+            System.out.println(!gameState.getHumanPlaysWithFox() ? "You won!" : "You lose!");
         }
     }
 }
