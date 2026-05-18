@@ -5,7 +5,7 @@ public class AIPlayer {
     public static <M> M findBestMove(GameState<M> state, int depth) {
 
         M bestMove = null;
-        int bestValue = Integer.MAX_VALUE;
+        int bestValue = Integer.MIN_VALUE + 1;
 
         int color = state.isMaxPlayerTurn() ? 1 : -1;
 
@@ -31,7 +31,7 @@ public class AIPlayer {
             return color * state.evaluate();
         }
 
-        int maxVal = Integer.MIN_VALUE;
+        int maxVal = -1000000;
 
         for (M move : state.getPossibleMoves()) {
             GameState<M> child = state.makeMove(move);

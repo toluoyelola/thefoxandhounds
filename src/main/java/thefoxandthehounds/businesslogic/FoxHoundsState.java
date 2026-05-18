@@ -49,7 +49,7 @@ public class FoxHoundsState implements GameState<Move> {
                 int horizontalDist = Math.abs(h.getCol() - fox.getCol());
 
                 // Hounds want this distance to be as small as possible
-                score -= (verticalDist * 10) + (horizontalDist * 5);
+                score += (verticalDist * 10) + (horizontalDist * 5);
             }
         }
 
